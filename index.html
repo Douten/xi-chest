@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>Number guessing game</title>
+
+    <style>
+      html {
+        font-family: sans-serif;
+      }
+
+      body {
+        width: 50%;
+        max-width: 800px;
+        min-width: 480px;
+        margin: 0 auto;
+      }
+
+      .lastResult {
+        color: white;
+        padding: 3px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Number guessing game</h1>
+
+    <p>We have selected a random number between 10 and 99. See if you can guess it in 5 turns or fewer.</p>
+
+    <div class="form">
+      <label for="guessField">Enter a guess: </label><input type="text" id="guessField" class="guessField">
+      <input type="submit" value="Guess" class="guessSubmit">
+      <input type="submit" value="Hint" class="hintSubmit">
+    </div>
+
+    <div class="resultParas">
+      <p class="message"></p>
+    </div>
+
+    <script>
+      var keyNum =  Math.floor(Math.random() * (99 - 10) + 10);
+
+      const guesses = document.querySelector('.guesses');
+      const guessSubmit = document.querySelector('.guessSubmit');
+      const hintSubmit = document.querySelector('.hintSubmit');
+      const guessField = document.querySelector('.guessField');
+      const messageBox = document.querySelector('.message');
+
+      let guessCount = 1;
+      let resetButton;
+
+      function checkGuess() {
+        let userGuess = Number(guessField.value);
+        /* if (guessCount === 1) {
+          guesses.textContent = 'Previous guesses: ';
+        } */
+
+        // guesses.textContent += userGuess + ' ';
+
+        if (userGuess == keyNum) {
+          messageBox.textContent = 'Congratulations! You got it right!';
+          messageBox.style.backgroundColor = 'green';
+          setGameOver();
+        } else if (guessCount == 7) {
+          messageBox.textContent = '!!!GAME OVER!!!';
+          setGameOver();
+        } else {
+          messageBox.textContent = 'Wrong!';
+          messageBox.style.backgroundColor = 'red';
+          if(userGuess < keyNum) {
+            messageBox.textContent += ' Last guess was too low!' ;
+          } else if(userGuess > keyNum) {
+            messageBox.textContent += ' Last guess was too high!';
+          }
+        }
+
+        guessCount++;
+        guessField.value = '';
+        guessField.focus();
+      }
+
+      function getHint(){
+
+        let hintType = Math.ceil(Math.random() * (5 - 1) + 1);
+        var digit;
+        var hintMsg;
+
+        switch (hintType){
+            case 1:
+                if (Math.round(Math.random())){
+                    digit = keyNum;
+                    hintMsg = "Second digit ";
+                }else{
+                    digit = Number(String(keyNum).charAt(0));
+                    hintMsg = "First digit ";
+                }
+                if(digit % 2 == 0){
+                    hintMsg += " is even";
+                }
+                else{
+                    hintMsg += " is odd";
+                }
+                break;
+            case 2:
+                if (Math.round(Math.random())){
+                    hintMsg = "Second digit is " + String(keyNum).charAt(1);
+                }else{
+                    hintMsg = "First digit " + String(keyNum).charAt(0);
+                }
+                break;
+            case 3:
+                hintMsg = "One of the two digits is ";
+                if (Math.round(Math.random())){
+                     hintMsg += String(keyNum).charAt(1);
+                }else{
+                    hintMsg += String(keyNum).charAt(0);
+                }
+                break;
+            case 4:
+                if (Math.round(Math.random())){
+                    digit = Number(String(keyNum).charAt(1));
+                    hintMsg = "Second digit is ";
+                }else{
+                    digit = Number(String(keyNum).charAt(0));
+                    hintMsg = "First digit is ";
+                }
+
+                let position = Math.floor(Math.random() * (3 - 1) + 1);
+
+                if (digit == 0){
+                    hintMsg += " 0, 1, or 2.";
+                }
+                else if (digit == 9){
+                    hintMsg += " 7, 8, or 9.";
+                }
+                else if(digit == 1){
+                    if (position > 2){
+                        hintMsg += " 1, 2, or 3.";
+                    }
+                    else{
+                        hintMsg += " 0, 1, or 2.";
+                    }
+                }
+                else if(digit == 8){
+                    if (position > 2){
+                        hintMsg += " 7, 8, or 9.";
+                    }
+                    else{
+                        hintMsg += " 6, 7, or 8.";
+                    }
+                }
+                else{
+                    switch(position){
+                        case 0:
+                            hintMsg = hintMsg + digit + ", " + (digit+1) + ", or " + (digit+2) + ".";
+                        break;
+                        case 1:
+                            hintMsg = hintMsg + (digit-1) + ", " + digit + ", or " + (digit+1) + ".";
+                        break;
+                        case 2:
+                            hintMsg = hintMsg + (digit-2) + ", " + (digit-1) + ", or " + digit + ".";
+                        break;
+                    }
+                }
+                break;
+            case 5:
+                var lower = keyNum - (Math.ceil(Math.random() * (20 - 0) + 0));
+                var upper = keyNum + (Math.ceil(Math.random() * (20 - 0) + 0));
+                if (lower < 0){
+                    lower = 0;
+                }
+                if (upper > 99){
+                    upper = 99;
+                }
+
+                hintMsg = "The number is greater than " + lower + " and less than " + upper;
+
+                break;
+        }
+
+        messageBox.textContent = hintMsg;
+
+        if (guessCount == 6) {
+            hintSubmit.disabled = true;
+        }
+
+        guessCount++;
+        guessField.value = '';
+        guessField.focus();
+      }
+
+      guessSubmit.addEventListener('click', checkGuess);
+      hintSubmit.addEventListener('click', getHint);
+
+      function setGameOver() {
+        guessField.disabled = true;
+        guessSubmit.disabled = true;
+        resetButton = document.createElement('button');
+        resetButton.textContent = 'Start new game';
+        document.body.appendChild(resetButton);
+        resetButton.addEventListener('click', resetGame);
+      }
+
+      function resetGame() {
+        guessCount = 1;
+        const resetParas = document.querySelectorAll('.resultParas p');
+        for(let i = 0 ; i < resetParas.length ; i++) {
+          resetParas[i].textContent = '';
+        }
+
+        resetButton.parentNode.removeChild(resetButton);
+        guessField.disabled = false;
+        guessSubmit.disabled = false;
+        guessField.value = '';
+        guessField.focus();
+        keyNum =  Math.floor(Math.random() * (99 - 10) + 10);
+      }
+    </script>
+  </body>
+</html>
